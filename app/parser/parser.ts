@@ -1,4 +1,5 @@
-import {URL_PATTERN} from './patterns';
+import {BOR} from './patterns';
+import {debug} from '../utils';
 
 interface Page {
     url: string;
@@ -9,15 +10,36 @@ export class Parser {
 
     constructor() {}
 
-    lines: string[];
-    pages: Page[];
+    file: string = '';
+    records: string[] = [];
+    pages: Page[] = [];
 
-    loadFile(file: any) {
-        this.lines = this.splitIntoLines(file);
-        //this.blocks = this.find(file, URL_PATTERN);
+    loadFile(file: string): void {
+        this.file = file;     //Error check
+        this.processFile(file, BOR);
     }
 
-    splitIntoLines(text: string) {
+    processFile(file: string, borPattern: RegExp): void {
+        this.getRecords(this.file, BOR);
+        //debug(this.records[0]);
+        for (let record of this.records) {
+            this.processRecord(record);
+        }
+    }
+
+    private getRecords(file: string, borPattern: RegExp): void {
+        let index: number = -1;
+        for (let line of this.splitIntoLines(file)) {
+            if (this.find(line, borPattern)) { index++; this.records[index] = '' }
+            if (index > -1) { this.records[index] += line; }
+        }
+    }
+
+    private processRecord(record: string): void {
+        
+    }
+
+    private splitIntoLines(text: string): string[] {
         return text.split('\n');
     }
 

@@ -1,2 +1,2 @@
 // Set of regex patterns to match in file
-export const URL_PATTERN = /^Pagebuilder Template \:(.*)$/gm;
+export const BOR = /^ Pagebuilder Template\ (.*)$/gm;
