@@ -15,7 +15,7 @@ class Column {
     widgets: any[] = [];
 
     toString(): string {
-        return 'width: ' + this.width + ', widgets: ' + flatten(this.widgets);
+        return 'width: ' + this.width + ', widgets: [' + flatten(this.widgets) + ']';
     }
 }
 
@@ -27,10 +27,23 @@ class Row {
     type: string = '';
     cols: Column[] = [];
 
+    colWidths(): string {
+        return '[' + this.cols.map((c) => {
+            return c.width;
+        }).join() + ']';
+    }
+
+    gridWidth() {
+        return this.cols.map((c) => { return c.width; })
+            .reduce(function(previousValue, currentValue, currentIndex, array) {
+                return previousValue + currentValue;
+            });
+    }
+
     toString(): string {
-        return 'type: ' + this.type + ', cols: ' + this.cols.map((c) => {
+        return '[' + this.type + ', cols (' + this.cols.length + '): ' + this.cols.map((c) => {
             return c.toString();
-        });
+        }) + ']';
     }
 }
 
@@ -48,9 +61,10 @@ class Page {
     }
 
     toString(): string {
-        return 'url: ' + this.url + 'template: ' + this.template + ', cols: ' + this.rows.map((r) => {
-            return r.toString();
-        });
+        return this.url + '; ' + this.template +
+            '; rows(' + this.rows.length + '): ' + this.rows.map((r) => {
+                return r.gridWidth();
+            });
     }
 }
 
@@ -64,8 +78,8 @@ export class Parser {
     loadFile(file: string): void {
         this.file = file;     //Error check
         this.processFile(file, BOR);
-        //this.display();
-        debug(this.pages[0].toString());
+        debug(this.pages.length + ' records parsed');
+        this.display();
     }
 
     processFile(file: string, borPattern: Pattern): void {
