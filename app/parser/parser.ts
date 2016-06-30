@@ -3,12 +3,29 @@ import {
     Pattern,
     BOR,
     RECORD_URL,
-    RECORD_TEMPLATE
+    RECORD_TEMPLATE,
+    ROW,
+    COLS
 } from './patterns';
+
+class Row {
+
+    constructor(type: string) { 
+        this.type = type;
+    }
+    
+    type: string = '';
+    cols: string[] = [];
+}
 
 class Page {
     url: string = '';
     template: string = '';
+    rows: Row[] = [];
+
+    addRow(type: string) {
+        this.rows.push(new Row(type));
+    }    
 }
 
 export class Parser {
@@ -22,30 +39,35 @@ export class Parser {
     loadFile(file: string): void {
         this.file = file;     //Error check
         this.processFile(file, BOR);
-        console.log(this.records.length);
     }
 
     processFile(file: string, borPattern: Pattern): void {
-        this.getRecords(this.file, borPattern);
+        this.records = this.getRecords(this.file, borPattern);
         for (let record of this.records) {
             this.processRecord(record);
         }
         debug(this.pages[0]);
     }
 
-    private getRecords(file: string, borPattern: Pattern): void {
-        let index: number = -1;
+    private getRecords(file: string, borPattern: Pattern): string[] {
+        let index: number = -1,
+            records: string[] = [];
         for (let line of this.splitIntoLines(file)) {
-            if (this.find(line, borPattern)) { index++; this.records[index] = '' }
-            if (index > -1) { this.records[index] += line + '\n'; }
+            if (this.find(line, borPattern)) {
+                index++;
+                records[index] = ''
+            }
+            if (index > -1) {records[index] += line + '\n'; }
         }
+        return records;
     }
 
     private processRecord(record: string): void {
         let page = new Page();
         for (let line of this.splitIntoLines(record)) {
-            if (this.find(line, RECORD_URL)) { page.url = line; }
-            if (this.find(line, RECORD_TEMPLATE)) { page.template = line; }
+            if (this.find(line, RECORD_URL)) { page.url = RECORD_URL.removeMatchText(line); }
+            if (this.find(line, RECORD_TEMPLATE)) { page.template = RECORD_TEMPLATE.removeMatchText(line); }
+            if (this.find(line, ROW)) { page.addRow(ROW.removeMatchText(line)); }
         }
         this.pages.push(page);
     }
